@@ -1,6 +1,7 @@
 # polymarket-btc-takehome
 https://jobs.deel.com/8d80a7ac-56ca-4e5f-87d0-f106ddc5a243/job-details/75484e74-324d-4db0-a693-9de3f6b7de33/overview
 
+https://www.binance.com/en/square/post/300294926912497
 A take-home project for technical candidates.
 
 You write a Python model that emits buy / sell / flat signals every second

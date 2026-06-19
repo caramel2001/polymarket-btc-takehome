@@ -30,7 +30,7 @@ OUTPUT_DIR     = REPO_ROOT / "data" / "live_recordings"
 LOG_FILE       = REPO_ROOT / "logs" / "recorder.log"
 BATCH_DURATION = 3600.0   # seconds per batch
 SYMBOL         = "BTC5M"
-PRICE_SOURCE   = "polymarket"
+PRICE_SOURCE   = "binance"
 RETRY_DELAY    = 15.0     # seconds to wait after a failed batch before retrying
 
 # ── Logging setup ─────────────────────────────────────────────────────────────

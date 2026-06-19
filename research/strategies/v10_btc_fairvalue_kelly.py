@@ -68,7 +68,7 @@ SIGMA_1S    = 0.719e-4   # 1-second BTC log-return vol
 LOGIT_A     = 0.029      # logistic intercept
 LOGIT_B     = 1.474      # logistic slope on probit z
 
-EDGE_MIN    = 0.30       # p_fair - ask must exceed this to enter
+EDGE_MIN    = 0.25       # p_fair - ask must exceed this to enter
 # 0.12 looked best with instant fills, but replay executes signals with a
 # ONE-TICK delay and the market reprices toward BTC within that tick
 # (fill is +4.1c worse than trigger on average). Under delayed fills the
@@ -77,14 +77,14 @@ EDGE_MIN    = 0.30       # p_fair - ask must exceed this to enter
 ENTRY_TTR_HI = 240.0     # mid-event entry window
 ENTRY_TTR_LO = 40.0
 
-BTC_MOVE_MIN_BPS = 8.0   # |BTC move since open| must exceed this (log bps).
+BTC_MOVE_MIN_BPS = 6.0   # |BTC move since open| must exceed this (log bps).
 # Masks Binance-vs-resolution-oracle basis noise: in battery traces, the
 # losing high-edge entries clustered at 5-8bps moves where the model is
 # overconfident relative to the oracle the market actually settles on.
 # Matches the user's live-validated 0.06% filter. With EDGE_MIN=0.25:
 # train n=10 win 80.0% +20.6c/sh, test n=11 win 81.8% +19.0c/sh.
 
-ASK_LO      = 0.30       # never buy near-worthless or near-converged books
+ASK_LO      = 0.05       # never buy near-worthless or near-converged books
 ASK_HI      = 0.97
 
 KELLY_FRACTION = 0.50    # half-Kelly

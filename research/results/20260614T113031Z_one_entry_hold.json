@@ -1,0 +1,142 @@
+{
+  "label": "one_entry_hold",
+  "model_file": "model_submission.py",
+  "timestamp_utc": "20260614T113031Z",
+  "elapsed_s": 1.328599452972412,
+  "summary": {
+    "n_fixtures": 10,
+    "n_errors": 0,
+    "win_rate_vs_baseline": 0.3,
+    "mean_model_score": 10624.6388139589,
+    "median_model_score": 0.0,
+    "mean_baseline_score": 1975.3932921396402,
+    "mean_model_pnl": -113.75650473516555,
+    "mean_baseline_pnl": -623.6559936154679,
+    "total_model_pnl": -1137.5650473516555,
+    "total_baseline_pnl": -6236.559936154679,
+    "mean_trades": 32.7,
+    "fixtures_with_zero_trades": 0
+  },
+  "fixtures": [
+    {
+      "fixture": "20260606_142359_20260606_152430_BTC5M.parquet",
+      "model_pnl": -1339.4919363910751,
+      "model_score": -0.0,
+      "model_trades": 33,
+      "model_sharpe": 8.755723047235332,
+      "model_max_dd": 1.30062757072752,
+      "baseline_pnl": -1648.2873030579908,
+      "baseline_score": 0.0,
+      "baseline_trades": 52,
+      "beats_baseline": false
+    },
+    {
+      "fixture": "20260606_152430_20260606_162501_BTC5M.parquet",
+      "model_pnl": 280.0976849220531,
+      "model_score": 11662.117726971135,
+      "model_trades": 36,
+      "model_sharpe": 73.0313123931201,
+      "model_max_dd": 0.42988981879225957,
+      "baseline_pnl": -1342.2476558954836,
+      "baseline_score": 0.0,
+      "baseline_trades": 40,
+      "beats_baseline": true
+    },
+    {
+      "fixture": "20260606_162501_20260606_172531_BTC5M.parquet",
+      "model_pnl": 2025.6072791113806,
+      "model_score": 52518.63186048784,
+      "model_trades": 48,
+      "model_sharpe": 140.72310555053792,
+      "model_max_dd": 0.8157562586045256,
+      "baseline_pnl": -1039.0199492931486,
+      "baseline_score": 0.0,
+      "baseline_trades": 48,
+      "beats_baseline": true
+    },
+    {
+      "fixture": "20260606_172531_20260606_182602_BTC5M.parquet",
+      "model_pnl": 908.8383458180488,
+      "model_score": 59462.916864761406,
+      "model_trades": 25,
+      "model_sharpe": 94.37447665952853,
+      "model_max_dd": 0.30672584498271827,
+      "baseline_pnl": -939.7367781135689,
+      "baseline_score": 0.0,
+      "baseline_trades": 36,
+      "beats_baseline": true
+    },
+    {
+      "fixture": "20260606_182602_20260606_192632_BTC5M.parquet",
+      "model_pnl": -831.6795145531738,
+      "model_score": 0.0,
+      "model_trades": 28,
+      "model_sharpe": 0.0,
+      "model_max_dd": 1.191517980062012,
+      "baseline_pnl": -1346.509914904109,
+      "baseline_score": 0.0,
+      "baseline_trades": 44,
+      "beats_baseline": false
+    },
+    {
+      "fixture": "20260606_192632_20260606_202703_BTC5M.parquet",
+      "model_pnl": -754.6632506838772,
+      "model_score": 0.0,
+      "model_trades": 29,
+      "model_sharpe": 0.0,
+      "model_max_dd": 1.0070691271563281,
+      "baseline_pnl": -1037.4611983958325,
+      "baseline_score": 0.0,
+      "baseline_trades": 51,
+      "beats_baseline": false
+    },
+    {
+      "fixture": "20260606_202703_20260606_212733_BTC5M.parquet",
+      "model_pnl": -62.234314659133815,
+      "model_score": -1663.6685989010987,
+      "model_trades": 23,
+      "model_sharpe": 51.907076057780735,
+      "model_max_dd": 0.4849963078497118,
+      "baseline_pnl": 212.0733656188579,
+      "baseline_score": 955.5740621312447,
+      "baseline_trades": 42,
+      "beats_baseline": false
+    },
+    {
+      "fixture": "20260606_212733_20260606_222804_BTC5M.parquet",
+      "model_pnl": -278.8882478953168,
+      "model_score": -7268.329313066494,
+      "model_trades": 29,
+      "model_sharpe": 62.09675529075787,
+      "model_max_dd": 0.5803033773548819,
+      "baseline_pnl": 21.747706080827925,
+      "baseline_score": 0.0,
+      "baseline_trades": 34,
+      "beats_baseline": false
+    },
+    {
+      "fixture": "20260606_222804_20260606_232835_BTC5M.parquet",
+      "model_pnl": -852.6394082704809,
+      "model_score": -2787.012390082656,
+      "model_trades": 41,
+      "model_sharpe": 23.91806016726364,
+      "model_max_dd": 0.863338071835048,
+      "baseline_pnl": 179.2486898392267,
+      "baseline_score": 6969.203349541172,
+      "baseline_trades": 59,
+      "beats_baseline": false
+    },
+    {
+      "fixture": "20260606_232835_20260607_002905_BTC5M.parquet",
+      "model_pnl": -232.51168475008035,
+      "model_score": -5678.268010581145,
+      "model_trades": 35,
+      "model_sharpe": 135.27139146563565,
+      "model_max_dd": 0.8194634467951135,
+      "baseline_pnl": 703.6331019665422,
+      "baseline_score": 11829.155509723983,
+      "baseline_trades": 54,
+      "beats_baseline": false
+    }
+  ]
+}
