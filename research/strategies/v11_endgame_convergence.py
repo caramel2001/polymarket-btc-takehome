@@ -1,6 +1,15 @@
 """
 v11_endgame_convergence.py — Capital-preservation endgame convergence capture.
 
+  ⚠️ NOT VIABLE — kept as a documented negative result. The price-edge below is
+  real but UNEXECUTABLE: ~97% of recorded ticks have ask_size=0, and only
+  4-11% of eligible endgame favourite ticks are fillable. Re-running the
+  backtest with the correct `ask_size>0` fill constraint collapses the sample
+  to n=13-42 over 9 days with no consistent EV sign (noise). In the battery
+  v11 traded 22×/220 fixtures for −$285. See IDEAS.md "[✗] LIQUIDITY" section.
+  Lesson recorded; do not promote.
+
+
 CONTEXT (2026-06-18, the "[✗] DEFINITIVE" finding in IDEAS.md):
   Across 195 Binance-backed fixtures (~9 days, 2,348 events) the BTC 5m market
   was proven EFFICIENT on six independent axes — no directional / fair-value /

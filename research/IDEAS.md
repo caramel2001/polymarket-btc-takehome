@@ -525,6 +525,163 @@ Status tags: `[ ]` open / untested · `[~]` in progress · `[x]` validated ·
 
 ---
 
+## [✗] ML MODEL (LightGBM, 9yr 1-min spot) — real standalone edge, no tradeable edge (2026-06-19)
+
+Full writeup: `research/ml/FINDINGS.md`. Pipeline: `research/ml/{features,train}.py`,
+model `research/ml/gbm_5min.pkl`.
+
+Trained LightGBM on 9 years of 1-min Binance spot (4.64M rows) with 34 causal
+features (multi-horizon momentum, realized vol, candle shape, volume, taker-buy
+order flow, RSI, cyclical time-of-day) to predict `close[t+5] > close[t]`.
+
+- **Standalone: real but tiny edge.** Test (2025-26, 769k samples) AUC 0.524,
+  monotonic calibration (p>0.55 → 56% actual up, p<0.45 → 41%). Significant,
+  not noise. Top features: 30/10-min momentum, close-position-in-range, volume,
+  taker buy-ratio.
+- **Vs market: no incremental edge.** At event open, raw `model_p` log-loss
+  0.6914 is WORSE than the market `open_mid` 0.6889. On strong divergence the
+  MARKET is right (its `up_mid` already reflects real-time BTC the minute-close
+  model is stale to). NB: Polymarket resolution window is `[t-1,t+4]` in minute
+  terms (96.3% outcome match) — the naive `[t,t+5]` alignment spuriously inverts
+  the signal; watch this in any future ML alignment.
+- **Divergence trade overfits.** "model confident + market≈0.50 + fillable",
+  train/test: every config positive train / negative test (+9c→−7c, +14c→−8c,
+  +24c→−6c). The 0.524-AUC signal is too small to survive spread+fee once
+  sliced to the tradeable subset.
+
+Same wall as the taker classes below. The market is a real-time ensemble with
+the same public data plus the live tick the model lacks. Reusable model kept
+for any non-taker-gated setting (maker execution / lower latency).
+
+**Cross-asset ETH→BTC addendum (2026-06-20):** added 9yr ETHUSDT 1-min. Raw
+lead-lag is contemporaneous (corr 0.57; BTC mildly LEADS ETH, not reverse). But
+a multi-feature model finds a genuine, leakage-verified short-lived ETH→BTC
+lead: lag-1 (strictly causal) ETH features lift 5-min-direction test AUC
+0.525→0.550 (smooth decay to baseline by lag-5 = real, not a timestamp leak).
+The ETH model is more decisive at the PM open (n=330 at p>0.55, still calibrated
+54.2%). YET no tradeable edge: raw model_p log-loss 0.6940 > market 0.6889,
+mid+model coef on model = +0.07 (negligible), divergence trade negative OOS
+every config (+1.95c→−3.12c). STRONGEST efficiency evidence in the project — a
+genuinely predictive 2nd asset adds nothing tradeable because the market prices
+it. ml/FINDINGS.md "Addendum 2".
+
+**Vol-regime addendum (option 3):** tested whether predicted remaining
+volatility is mispriced (high vol should fade favourites). Directionally
+CONFIRMED — `mid+vol` OOS log-loss 0.4934 < `mid only` 0.4940 (vol coef −0.103),
+and executable favourite EV decreases monotonically across vol terciles. But
+raw market price (0.4930) still wins and EVERY cell is negative OOS after costs
+(best: low-vol fav≥0.78, n=574, train +0.74c → test −4.21c). NB caught the
+small-sample trap: the same trade at n=13/15 looked like +11.9c/+7.9c
+(train/test) — full power flipped it negative. Full writeup: ml/FINDINGS.md
+addendum.
+
+## [✗] BATCH OF 6 NEW STRATEGY CLASSES — all dead (2026-06-19)
+
+Researched 6 structurally-distinct ideas after the directional/efficiency
+findings, ALL evaluated with the correct executable constraint (fill only when
+the filled side's `ask_size > 0` at the idx+1 tick) and a temporal train/test
+split. Every one fails. Data: 195 binance fixtures, 2,542 events.
+
+1. **Cross-token arbitrage** (buy BOTH sides when `up_ask+down_ask < 1`,
+   collect $1 guaranteed). DEAD: ask-sum min 0.980, median 1.010; only 6 ticks
+   in the entire dataset are <0.99, ZERO are <0.97. MMs hold the sum ≥ 1.
+
+2. **Complement / mid-sum mispricing** (`up_mid+down_mid` ≠ 1). DEAD:
+   sum = 1.0005 ± 0.006, never deviates >2%. No statistical-arb signal.
+
+3. **Order-book imbalance** (`(up_bid_size−up_ask_size)/Σ` predicting outcome).
+   DEAD: edge vs mid ranges −0.06…+0.01 across imbalance buckets, non-monotonic
+   = noise. Imbalance carries no info beyond the mid.
+
+4. **BTC momentum, executable** (trade `sign(btc−open)` on fillable ticks).
+   DEAD: every config positive in-sample, negative OOS (+1.6c→−1.7c train→test;
+   +1.9c→−8.9c at >20bps). Overfit — same as v10's lesson, now confirmed under
+   correct execution.
+
+5. **Offered-liquidity / take-the-favorite-when-ask-has-size.** DEAD and
+   MECHANISTICALLY IMPORTANT: −4 to −14c/share, negative on BOTH halves. When a
+   resting ask appears it is **adverse selection** — an informed seller hitting
+   you right before the price moves against you. (This is also a red flag for
+   the maker idea: the flow you'd be filled against is toxic.)
+
+6. **Microstructure mean-reversion** (fade a sharp 1-tick `up_mid` jump). DEAD:
+   −2.6c→−4.0c train→test. Mid jumps are informative (BTC moved), not noise to
+   fade.
+
+**Pattern:** every idea dies one of three ways — (a) the mispricing doesn't
+exist (1,2,3), (b) it's overfit noise OOS (4,6), or (c) adverse selection makes
+the executable flow toxic (5). This is now an exhaustive taker-side search; no
+strategy file created for any (all rejected at the analysis stage). Combined
+with the efficiency + liquidity findings, the taker opportunity set is closed.
+
+## [?] MAKER FILLS — the only untested path to profit (deferred, needs harness work)
+
+The whole research arc proves there's no edge as a *taker* (efficient market +
+the half-spread/fee/latency always eats the residual + 97% of ticks unfillable).
+The one structurally different avenue: be a *maker* — post resting limit orders
+and earn the spread instead of paying it, supplying the liquidity that is
+missing from 97% of ticks.
+
+Why it could work where taking can't:
+- A taker pays `ask` and the fee; a maker who gets hit collects `bid` (or sells
+  at `ask`) and may pay a lower/zero fee. The half-spread flips from cost to
+  revenue. On a market this tight (1-2c spreads) that's the difference between
+  −0.5c/trade and +0.5c/trade.
+- The market is efficient on *direction*, which HURTS takers but is fine for a
+  neutral maker who just wants to capture spread and stay delta-flat.
+
+Why it's not testable today (blocking work required):
+- The harness action space is target-position only (`Signal(side, size)`) with
+  **taker-only** execution: buys lift `best_ask·(1+slip)`, sells hit
+  `best_bid·(1−slip)` (`pnl.py _execute_leg`). There is no "post a resting
+  order at price X" primitive.
+- The recorded fixtures don't capture our own queue position or whether a
+  resting order *would* have been filled (no trade-print stream / queue model).
+- So simulating maker fills needs: (a) a Signal extension for limit price +
+  passive flag, (b) a fill model (did a market trade cross our resting price?
+  requires a trade/print feed the recorder doesn't currently save), (c) adverse-
+  selection accounting (you get filled mostly when the move goes against you).
+
+Verdict: highest-potential remaining idea, but it's an infra project (extend
+recorder to capture trade prints + book depth, add a passive-order fill model),
+not a strategy iteration. Park until taker avenues are fully exhausted (they
+now are). If pursued, start by saving the CLOB trade-print websocket alongside
+the book snapshots so a queue/fill model can be built.
+
+## [✗] LIQUIDITY: 97% of recorded ticks have ask_size=0 — harness fills only ~3% of ticks (2026-06-19)
+
+The binding execution constraint, and it invalidates a class of backtests.
+
+**Finding.** ~97-99% of ALL ticks in `data/live_recordings/*.parquet` have
+`up_ask_size == 0` AND `down_ask_size == 0` — across the whole event lifecycle
+(early/mid/late/endgame all ~97%). Cause: the live CLOB `/book` feed delivered
+a `bestAsk`/`bestBid` price on most ticks but no depth levels, so
+`harness.py:_book_best_ask_size` returns 0 (it reads `book.asks[0].size`, and
+`asks` is empty). The paper sim (`pnl.py BookTop.is_ask_tradable`) requires
+`best_ask_size > 0` to fill, so **the harness can only execute on the ~3% of
+ticks that carry real book depth.**
+
+**This silently broke every pandas EV backtest in this file** (v8/v9/v10/
+favorite/endgame). They filled at `up_ask`/`down_ask` without checking
+`ask_size > 0`, so they assumed fills the harness rejects. CORRECT backtest:
+require `ask_size > 0` at the (idx+1) fill tick.
+
+**Re-running the endgame idea correctly** (the one setup that survived a
+price-only train/test split, v11_endgame_convergence.py): with the size>0
+constraint the WHOLE 195-fixture / 9-day set yields only n=13-42 fillable
+endgame trades, and EV swings +6c to −9c across configs with no consistent
+sign — noise. The residual final-second convergence is real in PRICE but sits
+on ticks with zero liquidity (only 4-11% of eligible endgame favourite ticks
+are fillable). v11 ran in the battery as **−$285 / 22 trades** (mean −$1.30/fix,
+199/220 zero-trade) — confirming it can't execute.
+
+**Combined conclusion (with the [✗] DEFINITIVE efficiency result below):** this
+market has NO executable edge under taker-only fills — efficient on direction
+*and* illiquid where any residual mispricing exists. For the user's stated goal
+(capital preservation / real PnL), the optimum is to trade minimally. The
+promoted `model_submission.py` (−$1.3k vs baseline −$37k to −$42k on the
+binance set) is already the best capital-preserver found; v11 does not beat it.
+
 ## [✗] DEFINITIVE: no capturable directional edge — market is efficient to execution resolution (2026-06-18)
 
 Settles the v10 question with 195 Binance-backed fixtures (~9 days, 2,337
