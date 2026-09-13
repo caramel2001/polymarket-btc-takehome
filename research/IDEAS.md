@@ -1,5 +1,35 @@
 # Hypothesis log — Polymarket BTC 5m strategy
 
+> ## ⚠️ CORRECTIONS — read before trusting anything below (2026-09-13)
+>
+> Two load-bearing premises in this file were measured against the live market
+> and found to be **wrong**. See `research/PLAN.md` §0 and
+> `research/phase2/FINDINGS.md` for the evidence.
+>
+> 1. **"97-99% of ticks are unfillable" is a capture bug, not illiquidity.**
+>    `harness.py` rebuilds a one-level book with size 0 on every `price_change`.
+>    Corrected, ~100% of mid-event ticks are fillable and books carry ~48 levels.
+>    Every result below that gates on `ask_size > 0` is computed on a
+>    **volatility-selected 3-5% subsample**.
+> 2. **The `0.072·p·(1−p)` fee does not exist.** 644/644 live trade prints report
+>    `fee_rate_bps: "0"`. It is the take-home's scoring rule, not a real cost.
+>
+> What survives: the **headline "no taker edge" conclusion is correct** — no cell
+> survives honest event-level testing under any cost model.
+>
+> What changes:
+> - The favourite mispricing is **real but TTR-dependent** (+0.8c in the final
+>   ~2 min, −0.8c early). Pooling over TTR hides it — which is why this file
+>   concluded "efficient".
+> - **"BATCH OF 6" #5 is overstated ~5-15×**: −0.85c/share, not −4 to −14c, and
+>   the mechanism is the half-spread, not adverse selection (markout is
+>   −0.02 to −0.12c). The red flag it raised over the maker programme is
+>   substantially weaker than recorded.
+> - `MAKER_SCOPE.md`'s two "gating unknowns" are both resolved, both favourably:
+>   maker fee is **0**, and trade prints were always on the wire — the old
+>   recorder simply discarded them.
+
+
 Format per entry: **Hypothesis** (the mechanism, stated so it's falsifiable) →
 **Test** (what variant / fixture run checks it) → **Verdict** (validated /
 rejected / partial, with the aggregate numbers that justify it) →
